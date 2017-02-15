@@ -52,7 +52,7 @@ Generate a uniform distribution on a unit disc
 __device__ glm::vec3 RandUniformDisc(curandState *s){
 	glm::vec3 p;
 
-	float t = curand_uniform(s) *2 * M_PI;
+	float t = curand_uniform(s) * 2 * M_PI;
 	float r = 2 * curand_uniform(s);
 	if(r > 2){r -= 2.0f;}
 
@@ -116,6 +116,7 @@ __device__ void sample(int option, glm::vec3 *s, unsigned long id, unsigned int 
 		t = RandUniformDisc(&rngState);
 		break;
 	case 2:
+		// normal facing the positive z axis, for testing purposes only
 		t = RandCosineHemisphere(&rngState, glm::vec3(0.0f, 0.0f, 1.0f));
 		break;
 	case 3:
@@ -194,6 +195,7 @@ int main(int argc, const char * argv[]){
 
 	// close the file
 	txtfile.close();
+	cout << "File generated: out.txt" << std::endl;
 
 	// delete device memory
 	if( device_vectors != NULL ){

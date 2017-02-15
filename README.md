@@ -1,0 +1,2 @@
+# randtestCUDA
+Simple curand testing

@@ -83,9 +83,27 @@ __device__ glm::vec3 RandCosineHemisphere(curandState *s, glm::vec3 normal){
 }
 
 /*
-Given a radius, generate a unform distribution over a sphere
+Generate a uniform distribution within a unit sphere
 */
-__device__ glm::vec3 RandUniformSphere(curandState *s, float radius){
+__device__ glm::vec3 RandUniformInSphere(curandState *s){
+	glm::vec3 p;
+
+	// generate a point in a unit sphere using the rejection method
+	do{
+		p.x = 2.0f * curand_uniform(s) - 1.0f;
+		p.y = 2.0f * curand_uniform(s) - 1.0f;
+		p.z = 2.0f * curand_uniform(s) - 1.0f;
+
+
+	} while( glm::length(p) >= 1.0f );
+
+	return p;
+}
+/*
+ * Given a radius, generate random point on a sphere
+ */
+
+__device__ glm::vec3 RandUniformOnSphere(curandState *s, float radius){
 	glm::vec3 p;
 
 	float u = curand_uniform(s);
@@ -120,7 +138,10 @@ __device__ void sample(int option, glm::vec3 *s, unsigned int id, unsigned int s
 		t = RandCosineHemisphere(&rngState, glm::vec3(0.0f, 0.0f, 1.0f));
 		break;
 	case 3:
-		t = RandUniformSphere(&rngState, 1.0f);
+		t = RandUniformInSphere(&rngState);
+		break;
+	case 4:
+		t = RandUniformOnSphere(&rngState, 1.0f);
 		break;
 	default:
 		t = RandUniformSquare(&rngState);
@@ -160,7 +181,7 @@ int main(int argc, const char * argv[]){
 		y_samples = atoi(argv[2]);
 		option = atoi(argv[3]);
 	}else{
-		cout << " ./randtestCUDA -samplesX -samplesY -option (0=square, 1=disc, 2=hemisphere, 3=sphere)" << std::endl;
+		cout << " ./randtestCUDA -samplesX -samplesY -option (0=square, 1=disc, 2=hemisphere, 3=in sphere, 4=on sphere)" << std::endl;
 		return EXIT_FAILURE;
 	}
 

@@ -101,12 +101,12 @@ __device__ glm::vec3 RandUniformSphere(curandState *s, float radius){
 	return p;
 }
 
-__device__ void sample(int option, glm::vec3 *s, unsigned long id, unsigned int seed){
+__device__ void sample(int option, glm::vec3 *s, unsigned int id, unsigned int seed){
 
 	glm::vec3 t;
 
 	curandState rngState;
-	curand_init(WangHash(seed)+id, 0, 0, &rngState);
+	curand_init((unsigned long long)WangHash(seed)+id, 0, 0, &rngState);
 
 	switch(option){
 	case 0:
@@ -135,8 +135,8 @@ __device__ void sample(int option, glm::vec3 *s, unsigned long id, unsigned int 
 
 __global__ void KERNEL_SAMPLE(int option, glm::vec3 *v, int samples, unsigned int seed){
 
-	unsigned long blockId = blockIdx.x + blockIdx.y * gridDim.x;
-	unsigned long threadId = blockId * (blockDim.x * blockDim.y) + (threadIdx.y * blockDim.x) + threadIdx.x;
+	unsigned int blockId = blockIdx.x + blockIdx.y * gridDim.x;
+	unsigned int threadId = blockId * (blockDim.x * blockDim.y) + (threadIdx.y * blockDim.x) + threadIdx.x;
 	if (threadId == samples) return;
 
 	// generate sample
@@ -177,7 +177,7 @@ int main(int argc, const char * argv[]){
 	// sample
 	dim3 blockSize = dim3(16, 16, 1);	// 256 threads
 	dim3 gridSize = dim3((x_samples + blockSize.x - 1) / blockSize.x, (y_samples + blockSize.y - 1) / blockSize.y, 1);
-	KERNEL_SAMPLE<<<gridSize, blockSize>>>(option, device_vectors, total_samples, clock());
+	KERNEL_SAMPLE<<<gridSize, blockSize>>>(option, device_vectors, total_samples, (unsigned int)time(NULL));
 	cudaDeviceSynchronize();
 
 	// copy from device to host

@@ -16,3 +16,5 @@ Release/nsightbuilddata
 *.txt
 
 Release/randtestCUDA
+/Release/
+/.DS_Store
